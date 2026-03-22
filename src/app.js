@@ -13,8 +13,21 @@ if (process.argv.length !== 4) {
   } else {
     const sourcePath = path.resolve(file1);
     let targetPath = destination;
+    const destinationEndsWithSlash =
+      destination.endsWith(path.sep) || destination.endsWith('/');
 
-    if (fs.existsSync(destination)) {
+    if (destinationEndsWithSlash) {
+      // Destination must be an existing directory
+      if (
+        !fs.existsSync(destination) ||
+        !fs.statSync(destination).isDirectory()
+      ) {
+        console.error(`Destination directory ${destination} does not exist`);
+        targetPath = null;
+      } else {
+        targetPath = path.join(destination, path.basename(file1));
+      }
+    } else if (fs.existsSync(destination)) {
       const destStat = fs.statSync(destination);
 
       if (destStat.isDirectory()) {
